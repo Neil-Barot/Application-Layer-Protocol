@@ -1,4 +1,12 @@
 import socket
+import sys
+
+
+serverIP = ""
+serverPort = 31249
+
+renderIP = ""
+renderPort = 31250
 
 HEADERSIZE = 10
 
@@ -16,15 +24,14 @@ def main():
 
     r = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ##r.connect((renderIP, renderPort))
-    r.connect((socket.gethostname(), 31250)) # For testing on local host
+    r.connect((renderIP, 31250)) # For testing on local host
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ##s.connect((renderIP, renderPort))
-    s.connect((socket.gethostname(), 31249)) # For testing on local host
+    s.connect((serverIP, 31249)) # For testing on local host
     sendMsg(s, "controller connected")
 
     userInput = ""
-    message = ""
     while True:
         userInput = inputCommand()
 
@@ -91,4 +98,12 @@ def sendMsg(sock:socket.socket, message:str):
     sock.send(msg.encode())
 
 if __name__ == "__main__":
+    print("test")
+    if(len(sys.argv) != 3):
+        print("Invalid arguments, try Client.py <Server IP> <Renderer IP>")
+        exit()
+    else:
+        serverIP = sys.argv[1]
+        renderIP = sys.argv[2]
+        
     main()

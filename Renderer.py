@@ -1,6 +1,9 @@
 import socket
 import select
-import time
+import sys
+
+serverIP = "gfhjbmjkhgkvb"
+renderIP = ""
 
 HEADERSIZE = 10
 DEFAULT_SEG_SIZE = 256
@@ -15,12 +18,12 @@ def main():
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     ##s.connect((serverIP, serverPort))
-    s.connect((socket.gethostname(), 31249))
+    s.connect((serverIP, 31249))
     sendMsg(s, "renderer connected")
 
     r = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Binds the render to localhost port 1234
     ##r.bind((socket.gethostname(), 1235)) 
-    r.bind((socket.gethostname(), 31250))
+    r.bind((renderIP, 31250))
     r.listen(5)
 
     
@@ -111,6 +114,7 @@ def recieveMsg(sock:socket.socket)-> str:
         return False
 
 def sendMsg(sock:socket.socket, message:str):
+    print(f"gets to send {message}")
     msg = f"{len(message):<{HEADERSIZE}}" + message
     sock.send(msg.encode())
 
@@ -119,6 +123,7 @@ def sendChunkRequest(s:socket.socket,filename:str,rProg:int):
     serverCommand = f"read {filename} {rProg}"
 
     print(f"sending: {serverCommand}")
+    print("gets here chunk request")
     sendMsg(s, serverCommand)
     return
 
@@ -130,7 +135,7 @@ def renderFile(s:socket.socket, c:socket.socket, filename:str,rProg:int): # This
         print(f"Filesize: {fileSize}")
         #d = s.recv(DEFAULT_SEG_SIZE)
         d = recieveMsg(s)
-        print(f"test {d}")
+        print(d)
         rProg += DEFAULT_SEG_SIZE
 
     c.setblocking(0) # Added to get the pause, resume, restart working
@@ -171,4 +176,10 @@ def renderFile(s:socket.socket, c:socket.socket, filename:str,rProg:int): # This
 
 
 if __name__ == "__main__":
+    if(len(sys.argv) != 3):
+        print("Invalid arguments, try Rednerer.py <server IP> <Renderer IP>")
+        exit()
+    else:
+        serverIP = sys.argv[1]
+        renderIP = sys.argv[2]
     main()

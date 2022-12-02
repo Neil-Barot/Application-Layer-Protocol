@@ -1,9 +1,12 @@
 import socket
 import select
+import sys
 import os
 
 HEADERSIZE = 10
 DEFAULT_SEG_SIZE = 256
+
+serverIP = "gfhjbmjkhgkvb"
 
 def main():
 
@@ -11,7 +14,7 @@ def main():
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Binds the render to localhost port 1234
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    s.bind((socket.gethostname(), 31249)) 
+    s.bind((serverIP, 31249)) 
     s.listen(5)
 
     socketList = [s] # This is probably unecessary, but storing the list of all connected clients for now
@@ -99,12 +102,13 @@ def sendMsg(sock:socket.socket, message):
     print(f"sending: {message}")
     msg = f"{len(message):<{HEADERSIZE}}" + message
     sock.send(msg.encode())
+    print("sent!")
 
 def getFileSize(filename:str):
     fileList = os.listdir('files')
 
     if(filename in fileList):
-        stats = os.stat(os.path.abspath(f"files\\{filename}"))
+        stats = os.stat(os.path.abspath(f"files/{filename}"))
         size = stats.st_size
         print(f"filesize: {size}")
         return size
@@ -159,4 +163,10 @@ if __name__ == "__main__":
     #print(getFile('stuff.txt'))
     #print()
     #print(getMediaChunk("stuff.txt"))
+
+    if(len(sys.argv) != 2):
+        print("Invalid arguments, try Server.py <server IP>")
+        exit()
+    else:
+        serverIP = sys.argv[1]
     main()
